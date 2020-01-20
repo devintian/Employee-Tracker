@@ -1,5 +1,6 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+const cTable = require('console.table');
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -25,7 +26,7 @@ function start() {
     inquirer
         .prompt({
         name: "Home",
-        type: "RAWlist",
+        type: "rawlist",
         message: "What would you like to do?",
         choices: [
             "View All Employees", 
@@ -52,7 +53,8 @@ function start() {
             break;
 
         case"Add Employee":
-            Add_emp();
+            Add_name();
+            //Add_a_manager();
             break;
 
         case"Add Role":
@@ -78,8 +80,8 @@ function Allemp(){
     console.log("Selecting all employees...\n");
     connection.query("SELECT * FROM employees", function(err,res){
         if(err) throw err;
-        console.log(res);
-        connection.end();
+        //console.log(res);
+        console.table(res);
     });
 }
 
@@ -87,8 +89,8 @@ function Allrole(){
     console.log("Selecting all roles...\n");
     connection.query("SELECT * FROM roles", function(err,res){
         if(err) throw err;
-        console.log(res);
-        connection.end();
+        //console.log(res);
+        console.table(res);
     });
 }
 
@@ -96,59 +98,150 @@ function Alldep(){
     console.log("Selecting all departments...\n");
     connection.query("SELECT * FROM departments", function(err,res){
         if(err) throw err;
-        console.log(res);
-        connection.end();
+        //console.log(res);
+        console.table(res);
     });
 }
 
-function Add_emp(){
+
+
+
+
+function Add_name(){
+    connection.query("SELECT * FROM roles", function(err,results){
+        inquirer
+            .prompt([
+                {
+                    name: "first_name",
+                    type: "input",
+                    message: "What's the employee's first name?"
+                },
+                {
+                    name: "last_name",
+                    type: "input",
+                    message: "What's the employee's last name?"
+                },
+                {
+                    name: "roles",
+                    type: "rawlist",
+                    choices: function(){
+                        var roleArray = [];
+                        for (var i = 0; i < results.length; i++){
+                            roleArray.push(results[i].title);
+                        }
+                        return roleArray;
+                    },
+                    message: "What's the employee's role?"
+                }
+
+            ])
+            .then(function(answer){
+                connection.query(
+                    "INSERT INTO employees SET ?",
+                    {
+                        first_name: answer.first_name,
+                        last_name: answer.last_name,
+                        
+                    }
+                );
+                connect.query(
+                    "???????????????"
+                )
+            }); 
+    });
+}
+
+function Add_role(){
+    connection.query("SELECT * FROM departments", function(err,results){
+        inquirer
+            .prompt([
+                {
+                    name: "title",
+                    type: "input",
+                    message: "What's the title of the role?"
+                },
+                {
+                    name: "departments",
+                    type: "rawlist",
+                    choices: function(){
+                        var departArray = [];
+                        for (var i = 0; i< results.length; i++){
+                            departArray.push(results[i].name);
+                        }
+                        return departArray;
+                    },
+                    message: "Which department of this role?"
+                }
+            ])
+            .then(function(answer){
+                connection.query(
+                    "INSERT INTO roles SET ?",
+                    {
+                        title: answer.title,
+                    }
+                )
+                connection.query(
+                    "?????????"
+                )
+            })
+    })
+}
+
+
+function Add_dep(){
     inquirer
         .prompt([
             {
-                name: "first_name",
+                name: "name",
                 type: "input",
-                message: "What's the employee's first name?"
-            },
-            {
-                name: "last_name",
-                type: "input",
-                message: "What's the employee's last name?"
-            },
+                message: "What's the departement's name?"
+            }
         ])
         .then(function(answer){
             connection.query(
-                "INSERT INTO employees SET ?",
+                "INSERT INTO departments SET ?",
                 {
-                    first_name: answer.first_name,
-                    last_name: answer.last_name,
+                    name: answer.name
+                },
+                function(err,res){
+                    if (err) throw err;
+                    console.log(res.affectedRow + " department inserted!\n");
+
                 }
             );
         });
-        connection.query("SELECT * FROM roles", function(err,results){
-            if(err) throw err;
-            inquirer
-                .prompt([
-                    {
-                        name: "roles",
-                        type: "rawlist",
-                        choices: function(){
-                            var roleArray = [];
-                            for (var i = 0; i < results.length; i++){
-                                roleArray.push(results[i].title);
-                            }
-                            return roleArray;
-                        },
-                        message: "What's the employee's role?"
-                    }
-                ])
-                .then(function(answer){
-                    var id = "SELECT id WHERE ?"//results[i]
-                    connection.query()
-                })
-        })
-    
 }
 
 function Remove_emp(){
-    
+    connection.query("SELECT * FROM employees", function(err,results){
+        if(err) throw err;
+        inquirer
+            .prompt([
+                {
+                    name: "choice",
+                    type: "rawlist",
+                    choices: function(){
+                        var choiceArray = [];
+                        for (var i = 0; i < results.length; i++){
+                            choiceArray.push(results[i].first_name);
+                        }
+                        return choiceArray;
+                    },
+                    message: "Which employee do you want to remove?"
+                }
+            ])
+            .then(function(answer){
+                console.log("Deleting a employee...\n");
+                var query = connection.query(
+                    "DELETE FROM employees WHERE ?",
+                    {
+                        last_name: answer
+                    },
+                    function(err,res){
+                        if(err) throw err;
+                        console.log(res.affectedRow + " employee deleted!\n");
+                    }
+                )
+            })
+    })
 }
