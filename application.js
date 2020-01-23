@@ -44,17 +44,17 @@ function start() {
             switch (answer.Home) {
                 case "View All Employees":
                     Allemp();
-                    start();
+                    
                     break;
 
                 case "View All Role":
                     Allrole();
-                    start();
+                    
                     break;
 
                 case "View All Department":
                     Alldep();
-                    start();
+                    
                     break;
 
                 case "Add Employee":
@@ -93,6 +93,9 @@ function Allemp() {
         if (err) throw err;
         //console.log(res);
         console.table(res);
+
+        start();
+        
     });
 }
 
@@ -201,8 +204,10 @@ function Add_name() {
                             role_id: data[0].id,
                             manager_id: answer.manager
                             
-                        }, function (err, res) {
+                        }, Allemp,
+                        function (err, res) {
                             console.log(res);
+                            start();
                         }
                     );
                 })
@@ -249,8 +254,11 @@ function Add_role() {
                             title: answer.title,
                             department_id: data[0].id,
                             salary: answer.salary
-                        }
+                        },
+                        Allrole,
+                        
                         );
+                        start();
                         
                     }
                 );
@@ -278,12 +286,14 @@ function Add_dep() {
                 {
                     name: answer.name
                 },
+                Alldep,
                 function (err, res) {
                     if (err) throw err;
                     console.log(answer.name + " department inserted!\n");
-
+                    
                 }
             );
+            start();
         });
 }
 function Getemployees(){
@@ -330,7 +340,7 @@ function Remove_emp() {
                 console.log("Deleting a employee...\n");
                 console.log(answer.choice);
                 connection.query(
-                    "DELETE FROM employees WHERE ?",//????????????????????????
+                    "DELETE FROM employees WHERE ?",
                     {
                         id: answer.choice
                     },
@@ -338,10 +348,12 @@ function Remove_emp() {
                         if (err) throw err;
                         console.log(res);
                         console.log(answer.choice.name + " employee deleted!\n");
-                    }
-                
-                )
-            })
+                    },
+                    Allemp,
+                    start()
+                )    
+            });
+            
     })
 }
 
@@ -403,9 +415,11 @@ function Update_empRole(){
                             },
                             {
                                 id: answer.choice
-                            }
+                            },
+                            Allemp,
                         ]
                     )
+                    start();
                 })
             })
     })
@@ -470,9 +484,11 @@ function changetitle(){
                                 },
                                 {
                                     id: data[0].id
-                                } 
+                                },
+                                Allrole,
                             ]                           
                         )
+                        start();
                     }
                 )
             })
@@ -514,8 +530,10 @@ function changesalary (){
                                 {
                                     id: data[0].id
                                 } 
-                            ]                           
+                            ],                           
+                            Allrole,
                         )
+                        start();
                     }
                 )
             })
@@ -578,9 +596,11 @@ function changedepartment(){
                                 },
                                 {
                                     title: answer.title
-                                }
+                                },
+                                Allrole,
                             ]                           
                         )
+                        start();
                     }
                 )
             });
