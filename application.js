@@ -105,6 +105,7 @@ function Allrole() {
         if (err) throw err;
         //console.log(res);
         console.table(res);
+        start();
     });
 }
 
@@ -114,6 +115,7 @@ function Alldep() {
         if (err) throw err;
         //console.log(res);
         console.table(res);
+        start();
     });
 }
 
@@ -134,6 +136,7 @@ function GetManagers() {
                 reject(err)
             }else{
                 resolve(managers);
+                //console.log(managers);
             }
         });
     })
@@ -167,53 +170,143 @@ function Add_name() {
                     },
                     message: "What's the employee's role?"
                 },
-                {
-                    name: "manager",
-                    type: "rawlist",
-                    choices: async function () {
-                        let managerArray = await GetManagers();
-                        return managerArray;
-                        // return [
-                        //     {
-                        //         name: 'Harper Liu',
-                        //         value: 1
-                        //     },
-                        //     {
-                        //         name: 'Devin T',
-                        //         value: 2
-                        //     },
-                        // ];
+                
+                // {
+                //     name: "manager",
+                //     type: "rawlist",
+                //     choices: async function () {
+                //         let managerArray = await GetManagers();
+                //         var a = [];
+                //         //console.log(managerArray);
+                //         if(managerArray = a){
+                //             console.log("heel")
+                //             return a;
+                    
+                //         }
+                //         else{
+                //             return managerArray;
+                //         }
                                              
-                    },
-                    message: "Which manager of this employee?"
+                //     },
+                //     message: "Which manager of this employee?"
 
-                }
+                // }
 
             ])
-            .then(function (answer) {
+            .then(async function (answer) {
+                // let b = await GetManagers();
+                
+                console.log("111");
+                console.log(GetManagers());
+                let b = await GetManagers();
+                //console.log(managerArray);
+                if(b.length === 0){
+                    console.log("222");
+                    connection.query("SELECT id FROM roles WHERE title = ?", answer.roles, function(err, data){
+                        connection.query(
+                            "INSERT INTO employees SET ?",
+                            {
+                                first_name: answer.first_name,
+                                last_name: answer.last_name,
+                                role_id: data[0].id,
+                                manager_id: 0
+                                
+                            }, Allemp,
+                            function (err, res) {
+                                console.log(res);
+                                start();
+                            }
+                        );        
+                    })
+                                               
+                }
+                else{
+                    inquirer
+                        .prompt([
+                            {
+                                name: "manager",
+                                type: "rawlist",
+                                choices: async function () {
+                                    let managerArray = await GetManagers();
+                                    return managerArray;
+                                },
+                                message: "Which manager of this employee?"
+                            }
+                        ])
+                        .then(function(answer){
+                            connection.query(
+                                "INSERT INTO employees SET ?",
+                                {
+                                    first_name: answer.first_name,
+                                    last_name: answer.last_name,
+                                    role_id: data[0].id,
+                                    manager_id: answer.manager
+                                    
+                                }, Allemp,
+                                function (err, res) {
+                                    console.log(res);
+                                    start();
+                                }
+                            );
+                        })
+                }                                 
+
+
                 // console.log(answer.roles);
-                connection.query("Select id from roles where title = ?", answer.roles, function (err, data) {
-                    //console.log(data[0].id);
-                    console.log(answer.manager);
+                // connection.query("Select id from roles where title = ?", answer.roles, function (err, data) {
+                //     //console.log(data[0].id);
+                //     console.log("hhh");
+                //     console.log(answer.manager);
+                //     var b = [];
+                //     if(answer.manager = b){
+                //         onnection.query(
+                //             "INSERT INTO employees SET ?",
+                //             {
+                //                 first_name: answer.first_name,
+                //                 last_name: answer.last_name,
+                //                 role_id: data[0].id,
+                //                 manager_id: 0
+                                
+                //             }, Allemp,
+                //             function (err, res) {
+                //                 console.log(res);
+                //                 start();
+                //             }
+                //         ); 
+                //     }else{
+                //         connection.query(
+                //             "INSERT INTO employees SET ?",
+                //             {
+                //                 first_name: answer.first_name,
+                //                 last_name: answer.last_name,
+                //                 role_id: data[0].id,
+                //                 manager_id: answer.manager
+                                
+                //             }, Allemp,
+                //             function (err, res) {
+                //                 console.log(res);
+                //                 start();
+                //             }
+                //         );
+                //     }
                     // console.log(data);
-                    connection.query(
-                        "INSERT INTO employees SET ?",
-                        {
-                            first_name: answer.first_name,
-                            last_name: answer.last_name,
-                            role_id: data[0].id,
-                            manager_id: answer.manager
+                    // connection.query(
+                    //     "INSERT INTO employees SET ?",
+                    //     {
+                    //         first_name: answer.first_name,
+                    //         last_name: answer.last_name,
+                    //         role_id: data[0].id,
+                    //         manager_id: answer.manager
                             
-                        }, Allemp,
-                        function (err, res) {
-                            console.log(res);
-                            start();
-                        }
-                    );
-                })
+                    //     }, Allemp,
+                    //     function (err, res) {
+                    //         console.log(res);
+                    //         start();
+                    //     }
+                    // );
+                // })
 
             });
-
     });
 }
 
